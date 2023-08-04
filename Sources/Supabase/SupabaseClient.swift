@@ -107,6 +107,14 @@ extension SupabaseClient: APIClientDelegate {
   public func client(_: APIClient, willSendRequest request: inout URLRequest) async throws {
     request = await adapt(request: request)
   }
+
+  public func client(_ client: APIClient, validateResponse response: HTTPURLResponse, data: Data, task: URLSessionTask) throws {
+    if 200 ..< 300 ~= response.statusCode {
+      return
+    }
+
+    throw try client.configuration.decoder.decode(PostgrestError.self, from: data)
+  }
 }
 
 extension SupabaseClient {
